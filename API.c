@@ -28,3 +28,4 @@ void main(){
     //aggiorna Top se necessario
 
 //TopK stampa indici(da zero) dei migliori finora (separati da spazio)
+//ok
