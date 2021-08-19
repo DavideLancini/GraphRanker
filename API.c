@@ -4,6 +4,10 @@ int nodesDimension;
 int rankingDimension;
 int index;
 
+int * readInt(){
+  
+}
+
 void firstRead();
 
 void setup();
