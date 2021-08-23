@@ -32,8 +32,8 @@ void main(){
       for (row = 0; row < d; row++)
         for (column = 0; column < d; column++)
           scanf("%d", (graphMatrix + row * d + column));
-          if(row == column)
-            *(graphMatrix + row * d + column) = 0; //diagonal is useless
+          if(row == column || column = 0)
+            *(graphMatrix + row * d + column) = 0; //diagonal and column 0 is useless for our usage
       //evaluate graph
       evaluation = evaluateGraph(d, graphMatrix);
       //update TopK
@@ -47,7 +47,8 @@ void main(){
 
 int evaluateGraph(int d, int *graphMatrix){
   //alllocate activationVector
-  int *activeRow = (int *) malloc (d * sizeof (int)); //temp
+  int *activeRow = (int *) malloc (d * sizeof (int)); //store the active rows
+  //TODO: better way for active rows: store the index (one less for cycle)
   int sum = 0;
   int min = 0;
   int minPos[2];
@@ -55,7 +56,7 @@ int evaluateGraph(int d, int *graphMatrix){
   *(activeRow) = 1;
   for(int i=1;i<d;i++)
     *(activeRow + i) = 0;
-  //set first
+  //SETUP
   for(int i=1;i<d;i++){
     if(*(graphMatrix + i) != 0){ //finding the first non zero value in the row 0
       min = *(graphMatrix + i);
@@ -63,18 +64,23 @@ int evaluateGraph(int d, int *graphMatrix){
       minPos[1]=i;
       break;
     }
-    if(i==d-1){ //row 0 is filled with zero, no connection possible
+    if(i==d-1){ //reached when row 0 is filled with zero, no connection possible
       return 0;
     }
   }
-  for(int i = 0; i<d;i++){ //check for minimum in the active rows
 
-
+  //MAIN CYCLE
+  for(int i = 0; i<d;i++){ //cycle in dimension
+    for(int j = 0; i<d;i++){ //cycle in active rows
+      if(*(activeRow + j) == 1){ //if the row is active
+        //TODO:cycle in that row for the minimum
+      }
+    }
+    //TODO: minimum found
+    //TODO:erease column of the minimum
+    //TODO:activate row of the minimum
+    //TODO:add minimum value to the row
+    //TODO:update sum
   }
-  //erease column of the minimum
-  //activate row of the minimum
-  //update sum
-
-
-
+  return sum;
 }
