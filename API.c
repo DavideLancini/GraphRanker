@@ -32,7 +32,7 @@ void main(){
       for (row = 0; row < d; row++)
         for (column = 0; column < d; column++)
           scanf("%d", (graphMatrix + row * d + column));
-          if(row == column || column = 0)
+          if(row == column || column == 0)
             *(graphMatrix + row * d + column) = 0; //diagonal and column 0 is useless for our usage
       //evaluate graph
       evaluation = evaluateGraph(d, graphMatrix);
