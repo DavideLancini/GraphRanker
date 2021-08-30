@@ -2,40 +2,40 @@
 #include <stdlib.h>
 int main ()
 {
-/*temp
-  int *activationVector = (int *) malloc (d * sizeof (int));
-  int evaluation = 0;
-  
+  int row, column;
+  int d = 4;
+  int maxLine;
+  int l;
+  long temp;
+  char *ptr;
+  char *ptrEnd;
+  long ret;
 
-  //clean matrix
-  int i, j;
-  for (i = 0; i < d; i++)
-    for (j = 0; j < d; j++)
-      *(graphMatrix + i * d + j) = 0;
-  
-    // print matrix 
-  for (i = 0; i < d; i++){
-    for (j = 0; j < d; j++)
-      printf ("%d ", *(graphMatrix + i * d + j));
-    printf("\n");
+  maxLine = 12*d;
+
+  char st[maxLine];
+
+  int *graphMatrix = (int *) malloc (d * d * sizeof (int));
+
+  for (row = 0; row < d; row++){
+    fgets(st, maxLine, stdin);
+    ptr = &st[0];
+    for (column = 0; column < d; column++){
+      ret = strtol(ptr, &ptr, 10);
+      ptr = ptr + sizeof (char);
+      *(graphMatrix + row * d + column) = (int)ret;
+      if(row == column || column == 0)
+        *(graphMatrix + row * d + column) = 0; //diagonal and column 0 is useless for our usage
+    }
   }
 
-APPUNTI
 
-
-// first input d (numero nodi grafo) int 32bit
-    //k lunghezza classifica int 32bit
-
-    // d: il numero di nodi dei grafi
-    // k: la lunghezza della classifica
-
-//AggiungiGrafo [matrice adiacenza]
-    //ricevi grafo
-    //valuta grafo
-    //aggiorna Top se necessario
-
-//TopK stampa indici(da zero) dei migliori finora (separati da spazio)
-//ok
-*/
-    return 0;
+  printf("\nPRINT: \n");
+  for (row = 0; row < d; row++){
+    for (column = 0; column < d; column++){
+      printf("%d ", *(graphMatrix + row * d + column));
+    }
+    printf("\n");
+  }
+  return 0;
 }   

@@ -2,18 +2,21 @@
 #include <stdlib.h>
 
 void readGraph(int *graphMatrix);
+void printGraph(int *graphMatrix);
 void evaluateGraph(int *graphMatrix);
+
 void printTop(int *topK);
 void addTop(int *topK);
 
-int d,k,evaluation,row,column;
-int graphIndex = 0;
-int trashold = 0;
+int d,k,evaluation,graphIndex,trashold,maxLine;
 char command[14];
 
 void main(){
   //read parameters
   scanf("%d %d", &d, &k);
+  maxLine = 12*d;
+  graphIndex = 0;
+  trashold = 0;
 
   //allocate necessary structures
   int *graphMatrix = (int *) malloc (d * d * sizeof (int));
@@ -26,6 +29,7 @@ void main(){
     }
     else{ //AggiungiGrafo
       readGraph(graphMatrix);
+      //printGraph(graphMatrix); //DEBUG
       evaluateGraph(graphMatrix);
       if(evaluation >= trashold){
         addTop(topK);
@@ -37,12 +41,30 @@ void main(){
 }
 
 void readGraph(int *graphMatrix){
-  for (row = 0; row < d; row++){
-    for (column = 0; column < d; column++){
-      scanf("%d", (graphMatrix + row * d + column));
+  char *ptr;
+  char st[maxLine];
+  long ret;
+  for (int row = 0; row < d; row++){
+    scanf("%s", st);
+    //fgets(st, maxLine, stdin); COULD BE BETTER
+    ptr = &st[0];
+    for (int column = 0; column < d; column++){
+      ret = strtol(ptr, &ptr, 10);
+      ptr = ptr + sizeof (char);
+      *(graphMatrix + row * d + column) = (int)ret;
       if(row == column || column == 0)
         *(graphMatrix + row * d + column) = 0; //diagonal and column 0 is useless for our usage
     }
+  }
+}
+
+void printGraph(int *graphMatrix){
+  printf("\nPRINT: \n");
+  for (int row = 0; row < d; row++){
+    for (int column = 0; column < d; column++){
+      printf("%d ", *(graphMatrix + row * d + column));
+    }
+    printf("\n");
   }
 }
 
@@ -87,11 +109,19 @@ void evaluateGraph(int *graphMatrix){
 }
 
 void printTop(int *topK){
-  for(int i = 0; i<graphIndex && i<99;i++){
+  for(int i = 0; i<graphIndex && i<k;i++){
     printf ("%d ", *(topK + i * 2));
   }
 }
 
 void addTop(int *topK){
+  //Se grafici meno di k inserisco in fondo
+
+  *(TopK + 2*graphIndex) = graphIndex; //Insert on bottom
+
+  //Se grafici più di k
+  //Search from bottom
+  //Change founded with current
+  //Search for new minimum trashold
 
 }
