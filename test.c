@@ -1,125 +1,39 @@
-/*
- * Simple list manipulation exercise.
- * 1. Create a list of integers.
- * 2. Print the list.
- * 3. Sort the list.
- * 4. Print the list
- * 5. Free the list nodes.
- */
-
-#include <stdlib.h>
-#include <stdio.h>
-
-struct node {
-    int value ;
-    struct node *next ;
-} ;
-
-extern struct node *mk_node(int v) ;
-extern void print_list(struct node *head) ;
-extern struct node *sort_list(struct node *head) ;
-extern void free_list(struct node *head) ;
-
-#define NVALUES (6)
-
-int initial_contents[] = { 3, 8, 2, 5, 1, 9 } ;
-
-/*
- * Main driver program. Create the list from the initial_contents,
- * print it, sort it, print it, free it, and return.
- */
-
-int main() {
-    struct node *head = NULL ;
-    struct node *curp ;
-
-    int i ;
-
-    /*
-     * Put the initial values into the list. This algorithm
-     * will result in the values being inserted in reverse
-     * order of the array.
-     */
-    for( i = 0 ; i < NVALUES ; i++ ) {
-        curp = mk_node( initial_contents[i] ) ;
-        curp->next = head ;
-        head = curp ;
+int evaluateGraph(int dimension, int *graphMatrix){
+  int evaluation = 0;
+  //allocate activationVector
+  int *activeRow = (int *) malloc (dimension * sizeof (int)); //store the active rows
+  //TODO: better way for active rows: store the index (one less for cycle)
+  int min = 0;
+  int minPos[2];
+  //reset activation vector
+  *(activeRow) = 1;
+  for(int i=1;i<dimension;i++)
+    *(activeRow + i) = 0;
+  //SETUP
+  for(int i=1;i<dimension;i++){
+    if(*(graphMatrix + i) != 0){ //finding the first non zero value in the row 0
+      min = *(graphMatrix + i);
+      minPos[0]=0;
+      minPos[1]=i;
+      break;
     }
-
-    print_list(head) ;
-    head = sort_list(head) ;
-    print_list(head) ;
-    free_list(head) ;
-
-    return 0 ;
-}
-
-/*
- * Return a new node with 'v' as the label and a NULL next link.
- */
-
-struct node *mk_node(int v) {
-    struct node *newp = malloc( sizeof(struct node) ) ;
-    newp->value = v;
-    newp->next = NULL;  
-
-    return newp ; // Place holder
-}
-
-/*
- * Print the list headed by 'head', one value per line.
- */
-
-void print_list(struct node *head) {
-    printf("List: ");
-    struct node *ptr = head;
-    while(ptr!=NULL){
-        printf("%d ", ptr->value);
-        ptr=ptr->next;
+    if(i==dimension-1){ //reached when row 0 is filled with zero, no connection possible
+      return 0;
     }
-    putchar('\n');
-}    
+  }
 
-/*
- * Sort the list headed by 'head', returning a pointer to the node
- * that ends up at the head of the list.
- */
-
-struct node *sort_list(struct node *head) {
-    struct node *tmpPtr;
-    struct node *tmpNxt;
-
-    tmpPtr = head;
-    tmpNxt = head->next;
-
-    int a, tmp;
-
-    while(tmpNxt != NULL){
-        a = tmpPtr->value;
-        while(tmpNxt != tmpPtr && tmpNxt->value < a){
-            tmp = a;
-            tmpPtr->value = tmpNxt->value;
-            tmpNxt->value = tmp;
-            tmpPtr = tmpPtr->next;
-        }
-        tmpPtr = head;
-        tmpNxt = tmpNxt->next;
+  //MAIN CYCLE
+  for(int i = 0; i<dimension;i++){ //cycle in dimension
+    for(int j = 0; i<dimension;i++){ //cycle in active rows
+      if(*(activeRow + j) == 1){ //if the row is active
+        //TODO:cycle in that row for the minimum
+      }
     }
-
-    return tmpPtr ; // Place holder
-}
-
-/*
- * Free all the nodes in the list headed by 'head'.
- */
-
-void free_list(struct node *head) {
-    //struct node *releasep ;
-    //while( head != NULL ){
-//      releasep = head;
-//      head = head->next ;
-//
-//      free(releasep->value) ;
-//      free(releasep) ;
-//  }
+    //TODO: minimum found
+    //TODO:erease column of the minimum
+    //TODO:activate row of the minimum
+    //TODO:add minimum value to the row
+    //TODO:update evaluation
+  }
+  return evaluation;
 }
