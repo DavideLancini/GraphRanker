@@ -83,10 +83,10 @@ void printGraph(int dimension, int *graphMatrix){
 
 /*
  * Take a graph and evaluates it.
- * External cycle: keep count on how many rows are active
+ * External cycle: keep count on how many rows are active (i)
  * Active Row Cycle: cycle in the active row
- * Row Cycle: cycle in that row for the minimum
- * Minimum Founded (XColumn, Xvalue): 
+ * In Row Cycle: cycle in that row for the minimum
+ * Minimum Found (XColumn, Xvalue): 
  *  add(XV) to sum
  *  delete Column(XC)
  *  activate Row(XC),
@@ -98,8 +98,13 @@ int evaluateGraph(int dimension, int *graphMatrix){
   int minimumValue = 0;
   //allocate activationVector
   int *activeRow = (int *) malloc (dimension * sizeof (int)); //store the active rows
-  for(int i=0; i < dimension; i++){ //external cycle
 
+  for(int i=1; i <= dimension 1; i++){ //External Cycle
+    for(int j=0; j < i, j++){ //Active Row Cycle
+      for(int k=0; k < dimension; k++) //In Row Cycle
+        //TODO: Confront for the minimum (ignore zeros)
+    }
+    //TODO: Minimum Found, do all the good stuff
   }
 }
 
