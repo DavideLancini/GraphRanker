@@ -5,7 +5,7 @@ TODO:
 
     -Top is a list from top to low then latest to oldest 
             Ind Eval
-        0   3   7   <--head (discarded if better is found)
+        0   3   8   <--head (discarded if better is found)
         1   11  6   
         2   5   6
         3   2   4   <--this is newer
