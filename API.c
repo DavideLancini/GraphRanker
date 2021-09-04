@@ -29,17 +29,17 @@ int main(){
   Node *topHead = NULL;
 
   while(1){
-    ignore = scanf("%s", command);
-    if(command[0] == 'T'){ //TopK
+    if(scanf("%s", command) != EOF){
+      if(command[0] == 'T'){ //TopK
       printTop(topHead);
     }
-    else{ //AggiungiGraf
+    else{ //AggiungiGrafo
 
       readGraph(d, graphMatrix);
       // printGraph(d, graphMatrix);
 
       evaluation = evaluateGraph(d, graphMatrix);
-      printf("   DEBUG EVAL: %d\n", evaluation); //DEBUG
+      //printf("   DEBUG EVAL: %d\n", evaluation); //DEBUG
 
       if(graphIndex < k){
         topHead = addNode(graphIndex, evaluation, topHead);
@@ -49,8 +49,10 @@ int main(){
 
       graphIndex++;
     }
+    }else{
+      return 0; //Unreachable
+    }
   }
-  return 0; //Unreachable
 }
 
 /*
@@ -166,32 +168,37 @@ void printTop(Node *topHead){
  * Particular case 2: it's the new end node
  */
 Node *addNode(int index, long long evaluation, Node *topHead){
-  Node *newNode = malloc( sizeof(Node));
+  Node *newNode = malloc(sizeof(Node));
   newNode->index = index;
   newNode->evaluation = evaluation;
-  Node *tmpPtr;
-  tmpPtr = topHead;
+
 
   if(topHead == NULL){
     newNode->next = NULL;
     return newNode;
   }
 
-  if(tmpPtr->evaluation <= evaluation){ //Particular case 1
-    newNode->next = tmpPtr;
+  if(evaluation >= topHead->evaluation){ //Particular case 1
+    newNode->next = topHead;
     return newNode;
   }
 
+  Node *tmpPtr;
+  tmpPtr = topHead;
   Node *tmpNext;
   tmpNext = tmpPtr->next;
-
   while(tmpNext != NULL){
-    if(tmpNext->evaluation <= evaluation){ // equal or lower score found
+    if(evaluation >= tmpNext->evaluation){ // equal or better score found
       tmpPtr->next = newNode;
       newNode->next = tmpNext;
       return topHead;
+    }else{
+      tmpPtr = tmpNext;
+      tmpNext = tmpPtr->next;
     }
   }
+
+  //Particular Case 2
   tmpPtr->next = newNode;
   newNode->next = NULL;
   return topHead;

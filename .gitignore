@@ -3,7 +3,8 @@ Ignored files:
 a.out
 API
 API.exe
-test
+test.txt
 test.c
 test.exe
 todo.txt
+outputfile
