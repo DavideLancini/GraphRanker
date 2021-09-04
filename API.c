@@ -19,24 +19,54 @@ Node *insertNode(int index, long long evaluation, Node *topHead);
 int main(){
   int d,k,evaluation,graphIndex;
   graphIndex = 0;
-  char command[14];
+  k=0;
+  d=0;
+  char c;
 
-  //read parameters
-  ignore = scanf("%d %d", &d, &k);
+  //read d
+  c = getchar_unlocked();
+  while(c>47 && c<58){
+    d = d*10 + (c - 48);
+    c = getchar_unlocked();
+  }
+  //read k
+  c = getchar_unlocked();
+  while(c>47 && c<58){
+    k = k*10 + (c - 48);
+    c = getchar_unlocked();
+  }
 
   //allocate necessary structures
   int *graphMatrix = (int *) malloc (d * d * sizeof (int));
   Node *topHead = NULL;
 
   while(1){
-    if(scanf("%s", command) != EOF){
-      if(command[0] == 'T'){ //TopK
+    c = getchar_unlocked();
+    if(c != EOF){
+      if(c == 'T'){ //TopK
+      c = getchar_unlocked(); //Ignoring all the other stuff
+      c = getchar_unlocked();
+      c = getchar_unlocked();
+      c = getchar_unlocked();
       printTop(topHead);
     }
     else{ //AggiungiGrafo
+      c = getchar_unlocked(); 
+      c = getchar_unlocked();
+      c = getchar_unlocked();
+      c = getchar_unlocked();
+      c = getchar_unlocked();
+      c = getchar_unlocked();
+      c = getchar_unlocked();
+      c = getchar_unlocked();
+      c = getchar_unlocked();
+      c = getchar_unlocked();
+      c = getchar_unlocked();
+      c = getchar_unlocked();
+      c = getchar_unlocked();
 
       readGraph(d, graphMatrix);
-      // printGraph(d, graphMatrix);
+      //printGraph(d, graphMatrix);
 
       evaluation = evaluateGraph(d, graphMatrix);
       //printf("   DEBUG EVAL: %d\n", evaluation); //DEBUG
@@ -59,19 +89,23 @@ int main(){
  * Read a line than extract int discarding "," all is saved after the given pointer
  */
 void readGraph(int dimension, int *graphMatrix){
-  char *ptr;
-  char st[12 * dimension];
-  long ret;
-  for (int row = 0; row < dimension; row++){
-    ignore = scanf("%s", st);
-    //fgets(st, maxLine, stdin); COULD BE BETTER
-    ptr = &st[0];
-    for (int column = 0; column < dimension; column++){
-      ret = strtol(ptr, &ptr, 10);
-      ptr = ptr + sizeof (char);
-      *(graphMatrix + row * dimension + column) = (int)ret;
-      if(row == column || column == 0)
-        *(graphMatrix + row * dimension + column) = 0; //diagonal and column 0 is useless for our usage
+  char c;
+  int value = 0;
+
+  int position = 0;
+  int comma = 0;
+  int totCommas = dimension * dimension;
+
+  while(comma < totCommas){
+    c = getchar_unlocked();
+    if(c>47 && c<58){
+      value = value*10 + (c - 48);
+    }else{
+      comma++;
+      *(graphMatrix + position) = value;
+      position++;
+      // printf("%d ", value);
+      value = 0;
     }
   }
 }
@@ -83,7 +117,7 @@ void printGraph(int dimension, int *graphMatrix){
   printf("\nPRINT: \n");
   for (int row = 0; row < dimension; row++){
     for (int column = 0; column < dimension; column++){
-      printf("%.3d ", *(graphMatrix + row * dimension + column));
+      printf("%.6d ", *(graphMatrix + row * dimension + column));
     }
     printf("\n");
   }
@@ -109,6 +143,15 @@ long long evaluateGraph(int dimension, int *graphMatrix){
   int i,j,row, column;
   //allocate activationVector
   int *activeRow = (int *) malloc (dimension * sizeof (int)); //store the active rows
+
+  //ereasing column 1 and diagonal
+  for(row=0;row<dimension;row++){
+    for(column=0;column<dimension;column++){
+      if(column==0 || row == column){
+        *(graphMatrix + row*dimension + column)=0;
+      }
+    }
+  }
 
   for(i=0; i < dimension ; i++){ //External Cycle
     minimumValue = __INT_MAX__;
@@ -154,9 +197,13 @@ long long evaluateGraph(int dimension, int *graphMatrix){
  */
 void printTop(Node *topHead){
     Node *ptr = topHead;
+    if(ptr!=NULL){
+      printf("%d", ptr->index);
+      ptr=ptr->next;
+    }
     while(ptr!=NULL){
-        printf("%d ", ptr->index);
-        ptr=ptr->next;
+      printf(" %d", ptr->index);
+      ptr=ptr->next;
     }
     printf("\n");
 }
