@@ -3,48 +3,54 @@
 
 typedef struct node {
   int index;
-  int evaluation;
+  long long evaluation;
   struct node *next;
 } Node;
 
 void readGraph(int dimension, int *graphMatrix);
 void printGraph(int dimension, int *graphMatrix);
-int evaluateGraph(int dimension, int *graphMatrix);
+long long evaluateGraph(int dimension, int *graphMatrix);
 
-int topIsSaturated;
+int ignore;
 void printTop(Node *topHead);
-Node *addTop(int index, int evaluation, Node *topHead);
-Node *insertNode(int index, int evaluation, Node *topHead);
+Node *addNode(int index, long long evaluation, Node *topHead);
+Node *insertNode(int index, long long evaluation, Node *topHead);
 
-void main(){
+int main(){
   int d,k,evaluation,graphIndex;
   graphIndex = 0;
-  topIsSaturated = 0;
   char command[14];
 
   //read parameters
-  scanf("%d %d", &d, &k);
+  ignore = scanf("%d %d", &d, &k);
 
   //allocate necessary structures
   int *graphMatrix = (int *) malloc (d * d * sizeof (int));
   Node *topHead = NULL;
 
   while(1){
-    scanf("%s", command);
+    ignore = scanf("%s", command);
     if(command[0] == 'T'){ //TopK
       printTop(topHead);
     }
-    else{ //AggiungiGrafo
+    else{ //AggiungiGraf
+
       readGraph(d, graphMatrix);
-      //printGraph(graphMatrix); //DEBUG
+      // printGraph(d, graphMatrix);
+
       evaluation = evaluateGraph(d, graphMatrix);
-      topHead = addTop(graphIndex, evaluation, topHead);
+      printf("   DEBUG EVAL: %d\n", evaluation); //DEBUG
+
+      if(graphIndex < k){
+        topHead = addNode(graphIndex, evaluation, topHead);
+      }else{
+        topHead = insertNode(graphIndex, evaluation, topHead);
+      }
+
       graphIndex++;
-      if(graphIndex = k-1) //the list is filled
-        topIsSaturated=1;
     }
   }
-  return; //Unreachable
+  return 0; //Unreachable
 }
 
 /*
@@ -55,7 +61,7 @@ void readGraph(int dimension, int *graphMatrix){
   char st[12 * dimension];
   long ret;
   for (int row = 0; row < dimension; row++){
-    scanf("%s", st);
+    ignore = scanf("%s", st);
     //fgets(st, maxLine, stdin); COULD BE BETTER
     ptr = &st[0];
     for (int column = 0; column < dimension; column++){
@@ -75,7 +81,7 @@ void printGraph(int dimension, int *graphMatrix){
   printf("\nPRINT: \n");
   for (int row = 0; row < dimension; row++){
     for (int column = 0; column < dimension; column++){
-      printf("%.11d ", *(graphMatrix + row * dimension + column));
+      printf("%.3d ", *(graphMatrix + row * dimension + column));
     }
     printf("\n");
   }
@@ -92,21 +98,53 @@ void printGraph(int dimension, int *graphMatrix){
  *  activate Row(XC),
  *  add(XV) in Row(XC) 
  */
-int evaluateGraph(int dimension, int *graphMatrix){
-  int evaluation = 0;
+long long evaluateGraph(int dimension, int *graphMatrix){
+  long long evaluation = 0;
   int minimumPosition = 0;
   int minimumValue = 0;
+  int tmp;
+  int nonZeroFound;
+  int i,j,row, column;
   //allocate activationVector
   int *activeRow = (int *) malloc (dimension * sizeof (int)); //store the active rows
 
-  for(int i=1; i <= dimension ; i++){ //External Cycle
-    for(int j=0; j < i; j++){ //Active Row Cycle
-      for(int k=0; k < dimension; k++){ //In Row Cycle
-        //TODO: Confront for the minimum (ignore zeros)
+  for(i=0; i < dimension ; i++){ //External Cycle
+    minimumValue = __INT_MAX__;
+    nonZeroFound = 0;
+    for(j=0; j <= i; j++){ //Active Row Cycle
+      row = *(activeRow + j); //Row to search into
+      for(column=0; column < dimension; column++){ //In Row Cycle
+        tmp = *(graphMatrix + dimension*row + column);
+
+        if(tmp != 0){
+          nonZeroFound = 1;
+          if(tmp <= minimumValue){
+            minimumValue = tmp;
+            minimumPosition = column;
+          }
+        }
       }
     }
-    //TODO: Minimum Found, do all the good stuff
+    if(nonZeroFound == 0){
+      return evaluation;
+    }else{ //Minimum Found
+
+      // printf("DEBUG Minimum Found: %d (%d,%d)\n", minimumValue, row, minimumPosition);
+      evaluation += minimumValue; //add to sum
+
+      *(activeRow + i + 1) = minimumPosition; //activate row
+
+      for(column=0; column <dimension; column++){ //update row
+        if(*(graphMatrix + minimumPosition*dimension + column) !=0)
+          *(graphMatrix + minimumPosition*dimension + column) += minimumValue;
+      }
+      
+      for(row = 0; row<dimension; row++){ //delete column
+        *(graphMatrix + dimension*row + minimumPosition) = 0;
+      }
+    }
   }
+  return evaluation;
 }
 
 /*
@@ -118,19 +156,26 @@ void printTop(Node *topHead){
         printf("%d ", ptr->index);
         ptr=ptr->next;
     }
+    printf("\n");
 }
 
 /*
  * Search for an equal or lower score, inserts a node before it
+ * Particular Case 0: it's the first ever node
  * Particular case 1: it's the new head node
  * Particular case 2: it's the new end node
  */
-Node *addTop(int index, int evaluation, Node *topHead){
+Node *addNode(int index, long long evaluation, Node *topHead){
   Node *newNode = malloc( sizeof(Node));
   newNode->index = index;
   newNode->evaluation = evaluation;
   Node *tmpPtr;
   tmpPtr = topHead;
+
+  if(topHead == NULL){
+    newNode->next = NULL;
+    return newNode;
+  }
 
   if(tmpPtr->evaluation <= evaluation){ //Particular case 1
     newNode->next = tmpPtr;
@@ -157,7 +202,7 @@ Node *addTop(int index, int evaluation, Node *topHead){
  * If is worth delete the head (witch is the worst and newest score)
  * And call addNode
  */
-Node *insertNode(int index, int evaluation, Node *topHead){ //remove head then add node
+Node *insertNode(int index, long long evaluation, Node *topHead){ //remove head then add node
   if(evaluation >= topHead->evaluation){
       return topHead; //not good enough to be inserted
   }else{
@@ -165,6 +210,6 @@ Node *insertNode(int index, int evaluation, Node *topHead){ //remove head then a
     toDelete = topHead;
     topHead = topHead->next;
     free(toDelete);
-    return addTop(index,evaluation,topHead);
+    return addNode(index,evaluation,topHead);
   }
 }
