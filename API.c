@@ -99,10 +99,11 @@ int evaluateGraph(int dimension, int *graphMatrix){
   //allocate activationVector
   int *activeRow = (int *) malloc (dimension * sizeof (int)); //store the active rows
 
-  for(int i=1; i <= dimension 1; i++){ //External Cycle
-    for(int j=0; j < i, j++){ //Active Row Cycle
-      for(int k=0; k < dimension; k++) //In Row Cycle
+  for(int i=1; i <= dimension ; i++){ //External Cycle
+    for(int j=0; j < i; j++){ //Active Row Cycle
+      for(int k=0; k < dimension; k++){ //In Row Cycle
         //TODO: Confront for the minimum (ignore zeros)
+      }
     }
     //TODO: Minimum Found, do all the good stuff
   }
