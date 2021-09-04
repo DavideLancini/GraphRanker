@@ -1,20 +1,26 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+/*TODO:
+*/
+
 typedef struct node {
   int index;
   long long evaluation;
   struct node *next;
 } Node;
 
+// GRAPH FUNCTIONS
 void readGraph(int dimension, int *graphMatrix);
-void printGraph(int dimension, int *graphMatrix);
 long long evaluateGraph(int dimension, int *graphMatrix);
-
-int ignore;
+int searchMinimumInRow(int dimension, int *start);
+// TOP FUNCTIONS
 void printTop(Node *topHead);
 Node *addNode(int index, long long evaluation, Node *topHead);
 Node *insertNode(int index, long long evaluation, Node *topHead);
+// DEBUG ONLY
+void printGraph(int dimension, int *graphMatrix);
+void printRow(int dimension, int *start);
 
 int main(){
   int d,k,evaluation,graphIndex;
@@ -69,7 +75,7 @@ int main(){
       //printGraph(d, graphMatrix);
 
       evaluation = evaluateGraph(d, graphMatrix);
-      //printf("   DEBUG EVAL: %d\n", evaluation); //DEBUG
+      // printf("   DEBUG EVAL: %d\n", evaluation); //DEBUG
 
       if(graphIndex < k){
         topHead = addNode(graphIndex, evaluation, topHead);
@@ -124,72 +130,31 @@ void printGraph(int dimension, int *graphMatrix){
 }
 
 /*
- * Take a graph and evaluates it.
- * External cycle: keep count on how many rows are active (i)
- * Active Row Cycle: cycle in the active row
- * In Row Cycle: cycle in that row for the minimum
- * Minimum Found (XColumn, Xvalue): 
- *  add(XV) to sum
- *  delete Column(XC)
- *  activate Row(XC),
- *  add(XV) in Row(XC) 
+ * Search minimum position in a row given the start and the dimension
+ * Return 0 if no minimum is found
  */
-long long evaluateGraph(int dimension, int *graphMatrix){
-  long long evaluation = 0;
+int searchMinimumInRow(int dimension, int *start){
+  long long minimumValue = __INT64_MAX__;
   int minimumPosition = 0;
-  int minimumValue = 0;
   int tmp;
-  int nonZeroFound;
-  int i,j,row, column;
-  //allocate activationVector
-  int *activeRow = (int *) malloc (dimension * sizeof (int)); //store the active rows
-
-  //ereasing column 1 and diagonal
-  for(row=0;row<dimension;row++){
-    for(column=0;column<dimension;column++){
-      if(column==0 || row == column){
-        *(graphMatrix + row*dimension + column)=0;
-      }
+  for(int i = 0; i<dimension;i++){
+    tmp = *(start + i);
+    if(tmp!=0 && tmp < minimumValue){
+      minimumValue = tmp;
+      minimumPosition = i;
     }
   }
+  return minimumPosition;
+}
 
-  for(i=0; i < dimension ; i++){ //External Cycle
-    minimumValue = __INT_MAX__;
-    nonZeroFound = 0;
-    for(j=0; j <= i; j++){ //Active Row Cycle
-      row = *(activeRow + j); //Row to search into
-      for(column=0; column < dimension; column++){ //In Row Cycle
-        tmp = *(graphMatrix + dimension*row + column);
-
-        if(tmp != 0){
-          nonZeroFound = 1;
-          if(tmp <= minimumValue){
-            minimumValue = tmp;
-            minimumPosition = column;
-          }
-        }
-      }
-    }
-    if(nonZeroFound == 0){
-      return evaluation;
-    }else{ //Minimum Found
-
-      // printf("DEBUG Minimum Found: %d (%d,%d)\n", minimumValue, row, minimumPosition);
-      evaluation += minimumValue; //add to sum
-
-      *(activeRow + i + 1) = minimumPosition; //activate row
-
-      for(column=0; column <dimension; column++){ //update row
-        if(*(graphMatrix + minimumPosition*dimension + column) !=0)
-          *(graphMatrix + minimumPosition*dimension + column) += minimumValue;
-      }
-      
-      for(row = 0; row<dimension; row++){ //delete column
-        *(graphMatrix + dimension*row + minimumPosition) = 0;
-      }
-    }
+/*
+ * DEBUG ONLY: Print a dynamic array
+ */
+void printRow(int dimension, int *start){
+  for(int i=0; i<dimension; i++){
+    printf("%d ", *(start+i));
   }
-  return evaluation;
+  printf("\n");
 }
 
 /*
@@ -266,4 +231,100 @@ Node *insertNode(int index, long long evaluation, Node *topHead){ //remove head 
     free(toDelete);
     return addNode(index,evaluation,topHead);
   }
+}
+
+/*
+ * Take a graph and evaluates it.
+ * prepare graph and first row minimum
+ * External cycle: keep count on how many rows are active (i)
+ * Active Row Cycle: cycle in the active row
+ * In Row Cycle: cycle in that row for the minimum
+ * Minimum Found (XColumn, Xvalue): 
+ *  add(XV) to sum
+ *  delete Column(XC)
+ *  activate Row(XC),
+ *  add(XV) in Row(XC) 
+ */
+long long evaluateGraph(int dimension, int *graphMatrix){
+  // ALLOCATION
+  long long evaluation;
+  int minimumValue, minimumRow, minimumColumn;
+  int tmpValue, tmpRow, tmpColumn;
+  int nonZeroFound;
+  int i,j,row, column;
+  int *activeRow = (int *) malloc (dimension * sizeof (int)); //store the active rows
+  int *activeRowMinimumPosition = (int *) malloc (dimension * sizeof (int)); //store the active rows
+
+  // PREPARATION
+  evaluation = 0;
+  minimumRow = 0;
+  minimumColumn = 0;
+  //ereasing column 0 and diagonal
+  for(i=0;i<dimension;i++){
+    *(graphMatrix + i*dimension) = 0;
+    *(graphMatrix + i*dimension + i) = 0;
+  }
+
+  //set row 0 active
+  *activeRow = 0;
+
+  //build minimum for row 0
+  *activeRowMinimumPosition = searchMinimumInRow(dimension, graphMatrix);
+
+  for(i=0; i < dimension ; i++){ //External Cycle
+
+    //printGraph(dimension, graphMatrix);
+    //printRow(i+1, activeRow);
+    //printRow(dimension,activeRowMinimumPosition);
+
+    minimumValue = __INT32_MAX__;
+    nonZeroFound = 0;
+
+    for(j=0; j <= i; j++){ //Active Row Cycle
+      tmpRow = *(activeRow + j); //Row to analyze
+      tmpColumn = *(activeRowMinimumPosition + tmpRow); //Minimum to analyze
+      tmpValue = *(graphMatrix + dimension*tmpRow + tmpColumn);
+      // printf("     DEBUG: cheching %d(%d,%d) against %d(%d,%d)\n",tmpValue,tmpRow,tmpColumn,minimumValue,minimumRow,minimumColumn);
+      if(tmpValue != 0){
+        nonZeroFound = 1;
+        if(tmpValue < minimumValue){
+          minimumValue=tmpValue;
+          minimumColumn=tmpColumn;
+          minimumRow=tmpRow;
+        }
+      }
+    }
+    if(nonZeroFound == 0){//Some Nodes are Unreachable
+      return evaluation;
+    }else{//Minimum Found
+
+      // printf("DEBUG Minimum Found: %d (%d,%d)\n", minimumValue, minimumRow, minimumColumn);
+      evaluation += minimumValue; //add to sum
+
+      *(activeRow + i + 1) = minimumColumn; //activate row
+
+      for(column=0; column <dimension; column++){ //update row
+        if(*(graphMatrix + minimumColumn*dimension + column) !=0)
+          *(graphMatrix + minimumColumn*dimension + column) += minimumValue;
+      }
+      
+      for(row = 0; row<dimension; row++){ //delete column
+        *(graphMatrix + dimension*row + minimumColumn) = 0;
+      }
+
+      //search minimum in activated row
+      *(activeRowMinimumPosition + minimumColumn) = searchMinimumInRow(dimension, graphMatrix + minimumColumn*dimension);
+
+      //search minimum in used row
+      *(activeRowMinimumPosition + minimumRow) = searchMinimumInRow(dimension, graphMatrix + minimumRow*dimension);
+
+      //check for deleted minimum
+      for(j=0;j<= i+1 ;j++){
+        if(*(activeRowMinimumPosition + j) == minimumColumn){
+          *(activeRowMinimumPosition + j) = searchMinimumInRow(dimension, graphMatrix + j*dimension);
+        }
+      }
+    }
+  }
+  return evaluation;
 }
