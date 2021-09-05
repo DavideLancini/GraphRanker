@@ -259,32 +259,25 @@ long long evaluateGraph(int dimension, int *graphMatrix){
   evaluation = 0;
   minimumRow = 0;
   minimumColumn = 0;
-  //ereasing column 0 and diagonal
-  for(i=0;i<dimension;i++){
+  for(i=0;i<dimension;i++){ //ereasing column 0 and diagonal
     *(graphMatrix + i*dimension) = 0;
     *(graphMatrix + i*dimension + i) = 0;
   }
+  *activeRow = 0; //set row 0 active
+  for(int k=0;k<dimension;k++){ //bulid all minimums
+    *(activeRowMinimumPosition + k) = searchMinimumInRow(dimension, graphMatrix + (k*dimension));
+  }
 
-  //set row 0 active
-  *activeRow = 0;
-
-  //build minimum for row 0
-  *activeRowMinimumPosition = searchMinimumInRow(dimension, graphMatrix);
-
+  // COMPUTATION
   for(i=0; i < dimension ; i++){ //External Cycle
-
-    //printGraph(dimension, graphMatrix);
-    //printRow(i+1, activeRow);
-    //printRow(dimension,activeRowMinimumPosition);
-
     minimumValue = __INT32_MAX__;
     nonZeroFound = 0;
 
+    // SEARCH FOR GLOBAL MINIMUM
     for(j=0; j <= i; j++){ //Active Row Cycle
       tmpRow = *(activeRow + j); //Row to analyze
       tmpColumn = *(activeRowMinimumPosition + tmpRow); //Minimum to analyze
       tmpValue = *(graphMatrix + dimension*tmpRow + tmpColumn);
-      // printf("     DEBUG: cheching %d(%d,%d) against %d(%d,%d)\n",tmpValue,tmpRow,tmpColumn,minimumValue,minimumRow,minimumColumn);
       if(tmpValue != 0){
         nonZeroFound = 1;
         if(tmpValue < minimumValue){
@@ -294,11 +287,12 @@ long long evaluateGraph(int dimension, int *graphMatrix){
         }
       }
     }
+
+    // TAKE ACTION
     if(nonZeroFound == 0){//Some Nodes are Unreachable
       return evaluation;
     }else{//Minimum Found
 
-      // printf("DEBUG Minimum Found: %d (%d,%d)\n", minimumValue, minimumRow, minimumColumn);
       evaluation += minimumValue; //add to sum
 
       *(activeRow + i + 1) = minimumColumn; //activate row
@@ -313,13 +307,14 @@ long long evaluateGraph(int dimension, int *graphMatrix){
       }
 
       //search minimum in activated row
-      *(activeRowMinimumPosition + minimumColumn) = searchMinimumInRow(dimension, graphMatrix + minimumColumn*dimension);
+      *(activeRowMinimumPosition + minimumColumn) = searchMinimumInRow(dimension, graphMatrix + (minimumColumn*dimension));
 
       //search minimum in used row
-      *(activeRowMinimumPosition + minimumRow) = searchMinimumInRow(dimension, graphMatrix + minimumRow*dimension);
+      *(activeRowMinimumPosition + minimumRow) = searchMinimumInRow(dimension, graphMatrix + (minimumRow*dimension));
+      //printf("%d\n", *(activeRowMinimumPosition + minimumRow));
 
       //check for deleted minimum
-      for(j=0;j<= i+1 ;j++){
+      for(j=0;j< dimension ;j++){
         if(*(activeRowMinimumPosition + j) == minimumColumn){
           *(activeRowMinimumPosition + j) = searchMinimumInRow(dimension, graphMatrix + j*dimension);
         }
