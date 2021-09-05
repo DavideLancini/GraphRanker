@@ -6,18 +6,18 @@
 
 typedef struct node {
   int index;
-  long long evaluation;
+  int evaluation;
   struct node *next;
 } Node;
 
 // GRAPH FUNCTIONS
 void readGraph(int dimension, int *graphMatrix);
-long long evaluateGraph(int dimension, int *graphMatrix);
+int evaluateGraph(int dimension, int *graphMatrix);
 int searchMinimumInRow(int dimension, int *start);
 // TOP FUNCTIONS
 void printTop(Node *topHead);
-Node *addNode(int index, long long evaluation, Node *topHead);
-Node *insertNode(int index, long long evaluation, Node *topHead);
+Node *addNode(int index, int evaluation, Node *topHead);
+Node *insertNode(int index, int evaluation, Node *topHead);
 // DEBUG ONLY
 void printGraph(int dimension, int *graphMatrix);
 void printRow(int dimension, int *start);
@@ -134,7 +134,7 @@ void printGraph(int dimension, int *graphMatrix){
  * Return 0 if no minimum is found
  */
 int searchMinimumInRow(int dimension, int *start){
-  long long minimumValue = __INT64_MAX__;
+  int minimumValue = __INT_MAX__;
   int minimumPosition = 0;
   int tmp;
   for(int i = 0; i<dimension;i++){
@@ -179,7 +179,7 @@ void printTop(Node *topHead){
  * Particular case 1: it's the new head node
  * Particular case 2: it's the new end node
  */
-Node *addNode(int index, long long evaluation, Node *topHead){
+Node *addNode(int index, int evaluation, Node *topHead){
   Node *newNode = malloc(sizeof(Node));
   newNode->index = index;
   newNode->evaluation = evaluation;
@@ -221,7 +221,7 @@ Node *addNode(int index, long long evaluation, Node *topHead){
  * If is worth delete the head (witch is the worst and newest score)
  * And call addNode
  */
-Node *insertNode(int index, long long evaluation, Node *topHead){ //remove head then add node
+Node *insertNode(int index, int evaluation, Node *topHead){ //remove head then add node
   if(evaluation >= topHead->evaluation){
       return topHead; //not good enough to be inserted
   }else{
@@ -245,9 +245,9 @@ Node *insertNode(int index, long long evaluation, Node *topHead){ //remove head 
  *  activate Row(XC),
  *  add(XV) in Row(XC) 
  */
-long long evaluateGraph(int dimension, int *graphMatrix){
+int evaluateGraph(int dimension, int *graphMatrix){
   // ALLOCATION
-  long long evaluation;
+  int evaluation;
   int minimumValue, minimumRow, minimumColumn;
   int tmpValue, tmpRow, tmpColumn;
   int nonZeroFound;
