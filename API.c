@@ -10,6 +10,12 @@ typedef struct node {
   struct node *next;
 } Node;
 
+//STR
+int *activeRow; //store the active rows
+int *activeRowMinimumPosition; //store the active rows
+int *topIndex;
+int *topEvaluation;
+
 // GRAPH FUNCTIONS
 void readGraph(int dimension, int *graphMatrix);
 int evaluateGraph(int dimension, int *graphMatrix);
@@ -22,9 +28,8 @@ Node *insertNode(int index, int evaluation, Node *topHead);
 void printGraph(int dimension, int *graphMatrix);
 void printRow(int dimension, int *start);
 // TOP FUNCTION WITH VECTOR
-int *topIndex; int *topEvaluation;
-void printTopVector(int k, int index);
-void addTop(int evaluation, int index, int k);
+void printTopVector(int k, int index,  int *topIndex);
+void addTop(int evaluation, int index, int k,  int *topIndex, int *topEvaluation);
 
 int main(){
   int d,k,evaluation,graphIndex;
@@ -50,8 +55,10 @@ int main(){
   int *graphMatrix = (int *) malloc (d * d * sizeof (int));
   //Node *topHead = NULL;
   //top preparation
-  topIndex = (int *) malloc (d * sizeof (int));
-  topEvaluation = (int *) malloc (d * sizeof (int));
+  topIndex = (int *) malloc (k * sizeof (int));
+  topEvaluation = (int *) malloc (k * sizeof (int));
+  activeRow = (int *) malloc (d * sizeof (int)); //store the active rows
+  activeRowMinimumPosition = (int *) malloc (d * sizeof (int)); //store the active rows
 
   while(1){
     c = getchar_unlocked();
@@ -62,7 +69,7 @@ int main(){
       c = getchar_unlocked();
       c = getchar_unlocked();
       //printTop(topHead);
-      printTopVector(k,graphIndex);
+      printTopVector(k,graphIndex, topIndex);
     }
     else{ //AggiungiGrafo
       c = getchar_unlocked(); 
@@ -90,7 +97,7 @@ int main(){
         topHead = insertNode(graphIndex, evaluation, topHead);
       }
       */
-      addTop(evaluation,graphIndex,k);
+      addTop(evaluation,graphIndex,k, topIndex, topEvaluation);
 
       graphIndex++;
     }
@@ -161,7 +168,7 @@ int searchMinimumInRow(int dimension, int *start){
  */
 void printRow(int dimension, int *start){
   for(int i=0; i<dimension; i++){
-    printf("%d ", *(start+i));
+    printf("%.6d ", *(start+i));
   }
   printf("\n");
 }
@@ -260,8 +267,6 @@ int evaluateGraph(int dimension, int *graphMatrix){
   int tmpValue, tmpRow, tmpColumn;
   int nonZeroFound;
   int i,j,row, column;
-  int *activeRow = (int *) malloc (dimension * sizeof (int)); //store the active rows
-  int *activeRowMinimumPosition = (int *) malloc (dimension * sizeof (int)); //store the active rows
 
   // PREPARATION
   evaluation = 0;
@@ -332,9 +337,7 @@ int evaluateGraph(int dimension, int *graphMatrix){
   return evaluation;
 }
 
-
-
-void printTopVector(int k, int index){
+void printTopVector(int k, int index, int *topIndex){
   if(index != 0){ //is empty
     printf("%d", *(topIndex));
   }
@@ -344,27 +347,37 @@ void printTopVector(int k, int index){
   printf("\n");
 }
 
-void addTop(int evaluation, int index, int k){
+void addTop(int evaluation, int index, int k, int *topIndex, int *topEvaluation){
+  //printRow(k,topIndex);
+  //printRow(k,topEvaluation);
   if (index < k){
     *(topIndex + index) = index;
     *(topEvaluation + index) = evaluation;
+    //printf("     DEBUG: Just Insert %d(%d)\n\n", evaluation, index);
   }else{
     int tmpIndex = 0; int tmpEvaluation = evaluation; int tmpPosition = 0;
     for(int i=0; i<k;i++){
       //search for highest evaluation with highest index
-      if(*(topEvaluation + i) >= tmpEvaluation){
-        if(*(topIndex + i) > tmpIndex){
+      if(*(topEvaluation + i) > tmpEvaluation){
+        tmpIndex = *(topIndex + i);
+        tmpEvaluation = *(topEvaluation + i);
+        tmpPosition = i;
+      }else if(*(topEvaluation + i) == tmpEvaluation){
+        if(*(topIndex + i) >= tmpIndex){
           tmpIndex = *(topIndex + i);
           tmpEvaluation = *(topEvaluation + i);
           tmpPosition = i;
+          //printf("     DEBUG: Temp Worst %d(%d)\n\n", tmpEvaluation, tmpIndex);
         }
       }
-      if(tmpEvaluation != evaluation){ //worst found
-        *(topIndex + tmpPosition) = index;
-        *(topEvaluation + tmpPosition) = evaluation;
-      }else{
-        return; //worse evaluation not found
-      }
+    }
+    if(tmpEvaluation != evaluation){ //worst found
+      *(topIndex + tmpPosition) = index;
+      *(topEvaluation + tmpPosition) = evaluation;
+      //printf("     DEBUG: Exchanged %d(%d) with %d(%d)\n\n", evaluation, index, tmpEvaluation, tmpIndex);
+    }else{
+      //printf("     DEBUG: Discarded %d(%d)\n\n", evaluation, index);
+      return; //worse evaluation not found
     }
   }
 }
