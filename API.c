@@ -21,6 +21,10 @@ Node *insertNode(int index, int evaluation, Node *topHead);
 // DEBUG ONLY
 void printGraph(int dimension, int *graphMatrix);
 void printRow(int dimension, int *start);
+// TOP FUNCTION WITH VECTOR
+int *topIndex; int *topEvaluation;
+void printTopVector(int k, int index);
+void addTop(int evaluation, int index, int k);
 
 int main(){
   int d,k,evaluation,graphIndex;
@@ -44,7 +48,10 @@ int main(){
 
   //allocate necessary structures
   int *graphMatrix = (int *) malloc (d * d * sizeof (int));
-  Node *topHead = NULL;
+  //Node *topHead = NULL;
+  //top preparation
+  topIndex = (int *) malloc (d * sizeof (int));
+  topEvaluation = (int *) malloc (d * sizeof (int));
 
   while(1){
     c = getchar_unlocked();
@@ -54,7 +61,8 @@ int main(){
       c = getchar_unlocked();
       c = getchar_unlocked();
       c = getchar_unlocked();
-      printTop(topHead);
+      //printTop(topHead);
+      printTopVector(k,graphIndex);
     }
     else{ //AggiungiGrafo
       c = getchar_unlocked(); 
@@ -72,16 +80,17 @@ int main(){
       c = getchar_unlocked();
 
       readGraph(d, graphMatrix);
-      //printGraph(d, graphMatrix);
 
       evaluation = evaluateGraph(d, graphMatrix);
-      // printf("   DEBUG EVAL: %d\n", evaluation); //DEBUG
 
+      /*
       if(graphIndex < k){
         topHead = addNode(graphIndex, evaluation, topHead);
       }else{
         topHead = insertNode(graphIndex, evaluation, topHead);
       }
+      */
+      addTop(evaluation,graphIndex,k);
 
       graphIndex++;
     }
@@ -184,7 +193,6 @@ Node *addNode(int index, int evaluation, Node *topHead){
   newNode->index = index;
   newNode->evaluation = evaluation;
 
-
   if(topHead == NULL){
     newNode->next = NULL;
     return newNode;
@@ -199,7 +207,7 @@ Node *addNode(int index, int evaluation, Node *topHead){
   tmpPtr = topHead;
   Node *tmpNext;
   tmpNext = tmpPtr->next;
-  while(tmpNext != NULL){
+  while(tmpPtr->next != NULL){
     if(evaluation >= tmpNext->evaluation){ // equal or better score found
       tmpPtr->next = newNode;
       newNode->next = tmpNext;
@@ -322,4 +330,41 @@ int evaluateGraph(int dimension, int *graphMatrix){
     }
   }
   return evaluation;
+}
+
+
+
+void printTopVector(int k, int index){
+  if(index != 0){ //is empty
+    printf("%d", *(topIndex));
+  }
+  for(int i=1; i<index && i<k; i++){
+    printf(" %d", *(topIndex + i));
+  }
+  printf("\n");
+}
+
+void addTop(int evaluation, int index, int k){
+  if (index < k){
+    *(topIndex + index) = index;
+    *(topEvaluation + index) = evaluation;
+  }else{
+    int tmpIndex = 0; int tmpEvaluation = evaluation; int tmpPosition = 0;
+    for(int i=0; i<k;i++){
+      //search for highest evaluation with highest index
+      if(*(topEvaluation + i) >= tmpEvaluation){
+        if(*(topIndex + i) > tmpIndex){
+          tmpIndex = *(topIndex + i);
+          tmpEvaluation = *(topEvaluation + i);
+          tmpPosition = i;
+        }
+      }
+      if(tmpEvaluation != evaluation){ //worst found
+        *(topIndex + tmpPosition) = index;
+        *(topEvaluation + tmpPosition) = evaluation;
+      }else{
+        return; //worse evaluation not found
+      }
+    }
+  }
 }
